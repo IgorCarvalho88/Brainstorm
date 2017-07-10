@@ -56,12 +56,6 @@
         });
     });
 
-    //alert("js");
-    //$(".select2").select2({
-        //width: 'resolve'
-        //placeholder: "Selecionar interveniente",
-        //allowClear: true
-    // });
 
     // for each select option(interveniente) add the select2 plugin
     $('select').each(function(index) {
@@ -96,26 +90,6 @@
         $('#myForm').submit();
     });
 
-    //$('#botao').on('click', function (event) {
-    //    event.preventDefault();
-    //    $('#imagem').attr('src', '/Images/menos.gif');
-        
-    //});
-
-    //$('#Foo').on('show.bs.collapse',
-    //    function () {
-    //        $('#imagem').attr('src', '/Images/menos.gif');
-    //        //$('#min3').attr('title', 'Esconder');
-
-    //    });
-
-    //$('#Foo').on('hide.bs.collapse',
-    //    function () {
-    //        $('#imagem').attr('src', '/Images/mais.gif');
-    //        //$('#min3').attr('title', 'Esconder');
-
-    //    });
-
     // mudar a imagem ou icon para botao de cada tema
     $('.mostraGestInov').each(function (index) {
         $('#Foo' + (index)).on('show.bs.collapse',
@@ -134,17 +108,6 @@
     });
 
 
-    //function AltEstadoReg(tipo) {
-
-    //    if (tipo == 1) {
-    //        document.all("TBLEstadoReg").style.left = window.event.x - 250;
-    //        document.all("TBLEstadoReg").style.display = "inline";
-    //    }
-    //    else {
-    //        document.all("TBLEstadoReg").style.display = "none";
-    //    }
-    //}
-
 
     /*MODAL */
 
@@ -156,37 +119,6 @@
         //alert("entrei");
         $("#modalWorkflow").modal('show');
     })
-
-    //$(function () {
-    //    //var loading = $('#loadbar').hide();
-    //    //$(document)
-    //    //    .ajaxStart(function () {
-    //    //        loading.show();
-    //    //    }).ajaxStop(function () {
-    //    //        loading.hide();
-    //    //    });
-
-    //    $("label.btn").on('click', function () {
-    //        var choice = $(this).find('input:radio').val();
-    //        $('#loadbar').show();
-    //        $('#quiz').fadeOut();
-    //        setTimeout(function () {
-    //            $("#answer").html($(this).checking(choice));
-    //            $('#quiz').show();
-    //            $('#loadbar').fadeOut();
-    //            /* something else */
-    //        }, 1500);
-    //    });
-
-    //    $ans = 3;
-
-    //    //$.fn.checking = function (ck) {
-    //    //    if (ck != $ans)
-    //    //        return 'INCORRECT';
-    //    //    else
-    //    //        return 'CORRECT';
-    //    //};
-    //});
 
 });
 

@@ -34,5 +34,14 @@ namespace Brainstorm.Models
         public bool EstadoFlag { get; set; }
         public string Local { get; set; }
 
+        // campos adicionados para gravação de utilizador que modifica reuniao(sessoes)
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
+        public string Data_ins { get; set; }
+        public string Data_alt { get; set; }
+        public string Utilizador_ins { get; set; }
+
+        public string Utilizador_alt { get; set; }
+
+
     }
 }

@@ -263,6 +263,10 @@
                                 </div>
                             </div>
                             @Html.HiddenFor(m => m.ReuniaoBrainstorm.Id)
+                            @Html.HiddenFor(m => m.ReuniaoBrainstorm.Utilizador_ins)
+                            @Html.HiddenFor(m => m.ReuniaoBrainstorm.Utilizador_alt)
+                            @Html.HiddenFor(m => m.ReuniaoBrainstorm.Data_ins)
+                            @Html.HiddenFor(m => m.ReuniaoBrainstorm.Data_alt)
                             @*ver controller para estadoFlag*@
                             @Html.HiddenFor(m => m.ReuniaoBrainstorm.EstadoFlag, new { @class = "estadoFlag" })
                         </div>
@@ -324,6 +328,7 @@
                                                     @*<tr class="noBorder collapse" id="@("Foo"+i)">*@
                                                     <td colspan="1"><label class="control-label">@Traducoes.Traduz("Titulo do registo")</label></td>
                                                     <td colspan="1"> @Html.TextBoxFor(m => m.Temas[i].Titulo, new { @class = "form-control" }) </td>
+                                                    @Html.ValidationMessageFor(m => m.Temas[i].Titulo)
                                                     <td colspan="1"> <label><input type="checkbox" value="">@Traducoes.Traduz("Gestão de inovação")</label> </td>
                                                 </tr>
                                                 @Html.HiddenFor(m => m.Temas[i].Estado)

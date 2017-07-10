@@ -9,8 +9,8 @@ namespace Brainstorm.Models
     public class Tema
     {
         public int? Id { get; set; }
-        //[RequiredIf(@"Descricao != null || Comentarios != null || Importancia != null", 
-        //    ErrorMessage = "Por favor, preencha todos os campos necessários dos requisitos")]
+        [RequiredIf(@"Descricao != null || Comentarios != null",
+            ErrorMessage = "Por favor, preencha todos os campos necessários dos requisitos")]
         public string Titulo { get; set; }
         //[RequiredIf(@"Titulo != null || Comentarios != null || Importancia != null",
         //    ErrorMessage = "Por favor, preencha todos os campos necessários dos requisitos")]

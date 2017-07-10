@@ -16,5 +16,11 @@ namespace Brainstorm.Models
         public int Duracao { get; set; }
         public int DuracaoReal { get; set; }
         public string Local { get; set; }
+
+        public string Data_ins { get; set; }
+        public string Data_alt { get; set; }
+        public string Utilizador_ins { get; set; }
+
+        public string Utilizador_alt { get; set; }
     }
 }

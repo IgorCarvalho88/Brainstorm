@@ -37,6 +37,10 @@ namespace Brainstorm.Repository.Database
                 sqlComm.Parameters.AddWithValue("@brainstorm_duracaoPrev", model.ReuniaoBrainstorm.Duracao);
                 sqlComm.Parameters.AddWithValue("@brainstorm_duracaoReal", model.ReuniaoBrainstorm.DuracaoReal);
                 sqlComm.Parameters.AddWithValue("@brainstorm_observacoes", ((object)model.ReuniaoBrainstorm.Observacoes) ?? DBNull.Value);
+                sqlComm.Parameters.AddWithValue("@brainstorm_ut_ins", ((object)model.ReuniaoBrainstorm.Utilizador_ins) ?? DBNull.Value);
+                sqlComm.Parameters.AddWithValue("@brainstorm_ut_alt", ((object)model.ReuniaoBrainstorm.Utilizador_alt) ?? DBNull.Value);
+                sqlComm.Parameters.AddWithValue("@brainstorm_data_ins", ((object)model.ReuniaoBrainstorm.Data_ins) ?? DBNull.Value);
+                sqlComm.Parameters.AddWithValue("@brainstorm_data_alt", ((object)model.ReuniaoBrainstorm.Data_alt) ?? DBNull.Value);
                 //sqlComm.Parameters.AddWithValue("@brainstorm_interv1_codigo", model.Intervenientes[0].Codigo);
                 //sqlComm.Parameters.AddWithValue("@brainstorm_interv2_codigo",((object)model.Intervenientes[1].Codigo) ?? DBNull.Value);
                 //sqlComm.Parameters.AddWithValue("@brainstorm_interv3_codigo", ((object)model.Intervenientes[2].Codigo) ?? DBNull.Value);
@@ -252,6 +256,10 @@ namespace Brainstorm.Repository.Database
                     reuniaoBrainstorm.DuracaoReal = Convert.ToInt32(dt.Rows[0]["brainstorm_duracaoReal"].ToString());
                     reuniaoBrainstorm.Observacoes = dt.Rows[0]["brainstorm_observacoes"].ToString();
                     reuniaoBrainstorm.Local = dt.Rows[0]["brainstorm_local"].ToString();
+                    reuniaoBrainstorm.Utilizador_ins = dt.Rows[0]["brainstorm_ut_ins"].ToString();
+                    reuniaoBrainstorm.Utilizador_alt = dt.Rows[0]["brainstorm_ut_alt"].ToString();
+                    reuniaoBrainstorm.Data_ins = ((DateTime)dt.Rows[0]["brainstorm_data_ins"]).ToString("dd/MM/yyyy");
+                    reuniaoBrainstorm.Data_alt = ((DateTime)dt.Rows[0]["brainstorm_data_alt"]).ToString("dd/MM/yyyy");
 
 
                     return reuniaoBrainstorm;
@@ -367,6 +375,10 @@ namespace Brainstorm.Repository.Database
                 sqlComm.Parameters.AddWithValue("@brainstorm_duracaoReal", model.ReuniaoBrainstorm.DuracaoReal);
                 sqlComm.Parameters.AddWithValue("@brainstorm_observacoes", ((object)model.ReuniaoBrainstorm.Observacoes) ?? DBNull.Value);
                 sqlComm.Parameters.AddWithValue("@brainstorm_local", ((object)model.ReuniaoBrainstorm.Local) ?? DBNull.Value);
+                //sqlComm.Parameters.AddWithValue("@brainstorm_ut_ins", ((object)model.ReuniaoBrainstorm.Utilizador_ins) ?? DBNull.Value);
+                sqlComm.Parameters.AddWithValue("@brainstorm_ut_alt", ((object)model.ReuniaoBrainstorm.Utilizador_alt) ?? DBNull.Value);
+                //sqlComm.Parameters.AddWithValue("@brainstorm_data_ins", ((object)model.ReuniaoBrainstorm.Data_ins) ?? DBNull.Value);
+                sqlComm.Parameters.AddWithValue("@brainstorm_data_alt", ((object)model.ReuniaoBrainstorm.Data_alt) ?? DBNull.Value);
                 //sqlComm.Parameters.AddWithValue("@brainstorm_interv1_codigo", model.Intervenientes[0].Codigo);
                 //sqlComm.Parameters.AddWithValue("@brainstorm_interv2_codigo", ((object)model.Intervenientes[1].Codigo) ?? DBNull.Value);
                 //sqlComm.Parameters.AddWithValue("@brainstorm_interv3_codigo", ((object)model.Intervenientes[2].Codigo) ?? DBNull.Value);
@@ -484,7 +496,7 @@ namespace Brainstorm.Repository.Database
 
         }
 
-        public DataRow guardarEstado(string estado, int id)
+        public DataRow guardarEstado(string estado, string data, int id, string utilizador)
         {
 
             SqlConnection con = null;
@@ -504,8 +516,8 @@ namespace Brainstorm.Repository.Database
                 SqlCommand sqlComm = new SqlCommand("[dbo].[guardarBrainstormEstado]", con);
              
                 sqlComm.Parameters.AddWithValue("@brainstorm_wf_estado_brainstorm_id", id);
-                sqlComm.Parameters.AddWithValue("@brainstorm_estado_ut_codigo", "hardcoded");
-                sqlComm.Parameters.AddWithValue("@brainstorm_estado_data", DateTime.Now);
+                sqlComm.Parameters.AddWithValue("@brainstorm_estado_ut_codigo", utilizador);
+                sqlComm.Parameters.AddWithValue("@brainstorm_estado_data", data);
                 sqlComm.Parameters.AddWithValue("@brainstorm_estado_est_codigo", estado);              
                 sqlComm.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter();
@@ -592,6 +604,10 @@ namespace Brainstorm.Repository.Database
                         reuniaoBrainstorm.Observacoes = row["brainstorm_observacoes"].ToString();
                         reuniaoBrainstorm.Local = row["brainstorm_local"].ToString();
                         reuniaoBrainstorm.Descricao = row["descricao"].ToString();
+                        //reuniaoBrainstorm.Utilizador_ins = row["brainstorm_ut_ins"].ToString();
+                        //reuniaoBrainstorm.Utilizador_alt = row["brainstorm_ut_alt"].ToString();
+                        //reuniaoBrainstorm.Data_ins = ((DateTime)row["brainstorm_data_ins"]).ToString("dd/MM/yyyy");
+                        //reuniaoBrainstorm.Data_alt = ((DateTime)row["brainstorm_data_alt"]).ToString("dd/MM/yyyy");
                         reunioes.Add(reuniaoBrainstorm);
                     }
                     return reunioes;
@@ -712,6 +728,44 @@ namespace Brainstorm.Repository.Database
                     con.Close();
             }
             return null;
+
+        }
+
+        public void deleteTemas(int? id)
+        {
+            SqlConnection con = null;
+            try
+            {
+                string strConnString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+
+                con = new SqlConnection(strConnString);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Impossível de momento ligar a base de dados, tente mais tarde", ex.InnerException);
+            }
+            try
+            {
+                SqlCommand sqlComm = new SqlCommand("Delete FROM brainstorm_tema WHERE brainstorm_tema_brainstorm_id =" + id, con);
+                SqlDataAdapter da = new SqlDataAdapter();
+                da.SelectCommand = sqlComm;
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                var intervenientes = new List<Interveniente>();
+
+            }
+            catch (SqlException ex)
+            {
+                System.Console.WriteLine("EXCEPÇÃO  get periodos ultimas 8 horas: " + ex.Message);
+
+            }
+            finally
+            {
+                if (con.State == ConnectionState.Open)
+                    con.Close();
+            }
+
 
         }
     }

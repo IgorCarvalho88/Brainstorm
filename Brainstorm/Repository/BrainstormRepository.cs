@@ -14,7 +14,7 @@ namespace Brainstorm.Repository
         DataRow guardarReuniao(BrainstormViewModel model);
         DataRow guardarTema(Tema tema, int id);
 
-        DataRow guardarEstado(string estado, int id);
+        DataRow guardarEstado(string estado, string data, int id, string utilizador);
 
         ReuniaoBrainstorm getReuniaoBrainstorm(int id);
         List<Tema> getBrainstormTemas(int id);
@@ -29,5 +29,7 @@ namespace Brainstorm.Repository
         string getWorkflow(int id);
 
         void eliminarBrainstorm(int id);
+
+        void deleteTemas(int? id);
     }
 }

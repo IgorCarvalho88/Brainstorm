@@ -22,6 +22,13 @@ namespace Brainstorm.Controllers
         public ActionResult Reuniao()
         {
 
+            //if (Session["utilizador_codigo"] != null)
+            //{
+            //    var ut = Session["utilizador_codigo"].ToString();
+            //}
+
+            Sessoes();
+
             var reuniaoBrainstorm = new ReuniaoBrainstorm();
             var intervenientes = new List<Interveniente>();
             //var temas = new List<Tema>();
@@ -33,7 +40,7 @@ namespace Brainstorm.Controllers
             //    new Tema {Descricao = "Inovacao2", Importancia = "Alta", Comentarios = "teste2",  Titulo = "titulo2", Estado = "P", GestaoInov = 0 }
             //};
 
-             List<Tema> temas = new List<Tema>(new Tema[1]);
+             List<Tema> temas = new List<Tema>(new Tema[2]);
 
             var viewModel = new BrainstormViewModel
             {
@@ -51,7 +58,7 @@ namespace Brainstorm.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Reuniao(BrainstormViewModel model)
         {
-                    
+            Sessoes();
             // ModelState.Remove(nameof(model.Temas.Id));
             // valida campos
             if (!ModelState.IsValid)
@@ -87,9 +94,15 @@ namespace Brainstorm.Controllers
             if (model.ReuniaoBrainstorm.Id == 0)
             {
                 BrainstormRepository brainRepo = new BrainstormDB();
+                var ut = Session["utilizador_codigo"].ToString();
 
                 // inicializa estado para pendente
                 model.ReuniaoBrainstorm.Estado = "P";
+                //inicializa utilizador que ins/alt e data de ins/alt.
+                model.ReuniaoBrainstorm.Utilizador_ins = ut;
+                model.ReuniaoBrainstorm.Data_ins = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                model.ReuniaoBrainstorm.Utilizador_alt = ut;
+                model.ReuniaoBrainstorm.Data_alt = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
                 // split do codigo e nome
                 model.Intervenientes = tratarInterv2(model.IntervenientesView);
 
@@ -110,15 +123,19 @@ namespace Brainstorm.Controllers
                 for (int i = 0; i < model.Temas.Count; i++)
                 {
                     // estado pendente como default-- mudar a logica depois de falar com rui
-                    model.Temas[i].Estado = "P";
-                    DataRow idTemaAux = brainRepo.guardarTema(model.Temas[i], idBrainstorm);
-                    int idTema = int.Parse(idTemaAux[0].ToString());
-                    model.Temas[i].Id = idTema;
+                    if (model.Temas[i].Comentarios != null || model.Temas[i].Descricao != null || model.Temas[i].Titulo != null /*|| model.Temas[i].Comentarios != null*/)
+                    {
+                        model.Temas[i].Estado = "P";
+                        DataRow idTemaAux = brainRepo.guardarTema(model.Temas[i], idBrainstorm);
+                        int idTema = int.Parse(idTemaAux[0].ToString());
+                        model.Temas[i].Id = idTema;
+                    }
                 }
 
                 // guardar estado da reuniao (falta guardar utlizador que modifica estado, usar sessions?)
                 // ver hora em que é alterado o estado
-                DataRow estadoSeq = brainRepo.guardarEstado(model.ReuniaoBrainstorm.Estado, idBrainstorm);
+                string data = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                DataRow estadoSeq = brainRepo.guardarEstado(model.ReuniaoBrainstorm.Estado, data, idBrainstorm, ut);
 
                 TempData["additionalData"] = "Reunião criada com sucesso";
                 //return RedirectToAction("Reuniao");
@@ -127,10 +144,10 @@ namespace Brainstorm.Controllers
             else
             {
                 // update reuniao
-               
+                             
                 BrainstormRepository brainRepo = new BrainstormDB();
                 IIntervenientes repo = new IntervenientesDB();
-               
+                var ut = Session["utilizador_codigo"].ToString();
 
                 if (model.ReuniaoBrainstorm.Estado == "X")
                 {
@@ -148,10 +165,31 @@ namespace Brainstorm.Controllers
 
                     for (int i = 0; i < model.Temas.Count; i++)
                     {
-                        brainRepo.alterarTema(model.Temas[i], model.ReuniaoBrainstorm.Id);
+                        brainRepo.deleteTemas(model.Temas[i].Id);
                     }
 
-                    brainRepo.guardarEstado(model.ReuniaoBrainstorm.Estado, model.ReuniaoBrainstorm.Id);
+                    //for (int i = 0; i < model.Temas.Count; i++)
+                    //{
+                    //    if (model.Temas[i].Comentarios != null || model.Temas[i].Descricao != null || model.Temas[i].Titulo != null /*|| model.Temas[i].Comentarios != null*/)
+                    //    {
+                    //        brainRepo.alterarTema(model.Temas[i], model.ReuniaoBrainstorm.Id);
+                    //    }
+                    //}
+
+                    // guardar temas consoante o numero de temas presentes no model
+                    for (int i = 0; i < model.Temas.Count; i++)
+                    {
+                        // estado pendente como default-- mudar a logica depois de falar com rui
+                        if (model.Temas[i].Comentarios != null || model.Temas[i].Descricao != null || model.Temas[i].Titulo != null /*|| model.Temas[i].Comentarios != null*/)
+                        {
+                            model.Temas[i].Estado = "P";
+                            DataRow idTemaAux = brainRepo.guardarTema(model.Temas[i], model.ReuniaoBrainstorm.Id);
+                            int idTema = int.Parse(idTemaAux[0].ToString());
+                            model.Temas[i].Id = idTema;
+                        }
+                    }
+                    string data = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                    brainRepo.guardarEstado(model.ReuniaoBrainstorm.Estado, data, model.ReuniaoBrainstorm.Id, ut);
 
                     return View("ReuniaoAnulada", model);
 
@@ -160,6 +198,12 @@ namespace Brainstorm.Controllers
 
                 model.Intervenientes = tratarInterv2(model.IntervenientesView);
 
+                //model.ReuniaoBrainstorm.Utilizador_ins = "IGC";
+                //model.ReuniaoBrainstorm.Data_ins = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+
+                /*** adicionar quando anulada? bloco em cima***/
+                model.ReuniaoBrainstorm.Utilizador_alt = ut;
+                model.ReuniaoBrainstorm.Data_alt = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
                 DataRow teste = brainRepo.alterarReuniao(model, model.ReuniaoBrainstorm.Id);
                 // adicionar funcao de fazer delete aos intervenientes associados ao id
                 repo.deleteIntervenientes(model.ReuniaoBrainstorm.Id);
@@ -172,14 +216,37 @@ namespace Brainstorm.Controllers
 
                 for (int i = 0; i < model.Temas.Count; i++)
                 {
-                    DataRow teste2 = brainRepo.alterarTema(model.Temas[i], model.ReuniaoBrainstorm.Id);
+
+                    if(model.Temas[i].Id != null)
+                    {
+                        brainRepo.deleteTemas(model.ReuniaoBrainstorm.Id);
+                    }
+                    
                 }
+
+                // guardar temas consoante o numero de temas presentes no model
+                for (int i = 0; i < model.Temas.Count; i++)
+                {
+                    // estado pendente como default-- mudar a logica depois de falar com rui
+                    if (model.Temas[i].Comentarios != null || model.Temas[i].Descricao != null || model.Temas[i].Titulo != null /*|| model.Temas[i].Comentarios != null*/)
+                    {
+                        model.Temas[i].Estado = "P";
+                        DataRow idTemaAux = brainRepo.guardarTema(model.Temas[i], model.ReuniaoBrainstorm.Id);
+                        int idTema = int.Parse(idTemaAux[0].ToString());
+                        model.Temas[i].Id = idTema;
+                    }
+                }
+
+                //for (int i = 0; i < model.Temas.Count; i++)
+                //{
+                //    DataRow teste2 = brainRepo.alterarTema(model.Temas[i], model.ReuniaoBrainstorm.Id);
+                //}
 
                 // se escolhi estado actualizo o estado
                 if (model.ReuniaoBrainstorm.EstadoFlag)
                 {
-                   
-                        brainRepo.guardarEstado(model.ReuniaoBrainstorm.Estado, model.ReuniaoBrainstorm.Id);
+                    string data = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                    brainRepo.guardarEstado(model.ReuniaoBrainstorm.Estado, data, model.ReuniaoBrainstorm.Id, ut);
                 }
 
                 return RedirectToAction("EditarReuniao", new { model.ReuniaoBrainstorm.Id });
@@ -192,8 +259,7 @@ namespace Brainstorm.Controllers
 
         public ActionResult EditarReuniao(int id)
         {
-           
-            
+            Sessoes();
             BrainstormRepository brainRepo = new BrainstormDB();
             IIntervenientes repo = new IntervenientesDB();
 
@@ -201,13 +267,22 @@ namespace Brainstorm.Controllers
             var intervenientesSelecionados = new List<Interveniente>();
             var intervenientes = new List<Interveniente>();
             var temas = new List<Tema>();
+            //List<Tema> temasAux = new List<Tema>(new Tema[10]);
 
             string workflow;
             //var viewModel = new BrainstormViewModel();
 
             reuniaoBrainstorm = brainRepo.getReuniaoBrainstorm(id);
             reuniaoBrainstorm.Id = id;
+
+            // temas
             temas = brainRepo.getBrainstormTemas(id);
+            int tamanhoLista = 10;
+            tamanhoLista = tamanhoLista - temas.Count;
+            List<Tema> temasAux = new List<Tema>(new Tema[tamanhoLista]);
+            temas = temas.Concat(temasAux).ToList();
+
+
             intervenientesSelecionados = repo.getBrainstormIntervenientes(id);
             intervenientes = repo.getUT();
 
@@ -225,7 +300,6 @@ namespace Brainstorm.Controllers
                 SequenciaEstados = workflows
 
             };
-
             // Se a reuniao estiver anulada redireciona para a view reuniaoAnulada
             if (reuniaoBrainstorm.Estado == "X")
             {
@@ -234,8 +308,11 @@ namespace Brainstorm.Controllers
             return View("Reuniao", viewModel);
         }
 
+
+        /*** GESTAO DE BRAINSTORM***/
         public ActionResult GestaoBrainstorm()
         {
+            Sessoes();
             BrainstormRepository brainRepo = new BrainstormDB();
 
 
@@ -250,9 +327,30 @@ namespace Brainstorm.Controllers
             return View(viewModel);
         }
 
-        [HttpDelete]
-        [ValidateAntiForgeryToken]
-        public ActionResult GestaoBrainstorm(int id)
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult GestaoBrainstorm(int id)
+        //{
+        //    BrainstormRepository brainRepo = new BrainstormDB();
+
+        //    return RedirectToAction("EditarReuniao", new { id});
+
+
+            
+        //}      
+        public ActionResult GestaoEdit(int id)
+        {
+            Sessoes();
+            BrainstormRepository brainRepo = new BrainstormDB();
+
+            return RedirectToAction("EditarReuniao", new { id });
+
+
+        }
+
+
+        
+        public ActionResult GestaoDelete(int id)
         {
             BrainstormRepository brainRepo = new BrainstormDB();
             brainRepo.eliminarBrainstorm(id);
@@ -286,6 +384,8 @@ namespace Brainstorm.Controllers
             return intervs;
         }
 
+
+        /*** FUNÇÔES***/
         public List<Interveniente> tratarInterv2(string[] intervsAux)
         {
             var intervs = new List<Interveniente>();
@@ -338,20 +438,36 @@ namespace Brainstorm.Controllers
 
             return workflows;
         }
-            //for (int i = 0; i < intervsAux.Length; i++)
-            //{
-            //    string s = intervsAux[i];
-            //    Interveniente interveniente = new Interveniente();
-            //    if (!(String.IsNullOrWhiteSpace(s)))
-            //    {
-            //        var split = s.Split(new[] { "   " }, StringSplitOptions.None);
-            //        split[0] = split[0].Substring(1, split[0].Length - 2);
-            //        interveniente.Nome = split[1];
-            //        interveniente.Codigo = split[0];
-            //    }
 
-            //    intervs.Add(interveniente);
-            //}
+        public ActionResult Sessoes()
+        {
+            if (Session["utilizador_codigo"] != null)
+            {
+                var ut = Session["utilizador_codigo"].ToString();
+            }
+
+            else
+            {
+                //return RedirectToAction("Reuniao");
+                return HttpNotFound();
+            }
+
+            return null;
+        }
+        //for (int i = 0; i < intervsAux.Length; i++)
+        //{
+        //    string s = intervsAux[i];
+        //    Interveniente interveniente = new Interveniente();
+        //    if (!(String.IsNullOrWhiteSpace(s)))
+        //    {
+        //        var split = s.Split(new[] { "   " }, StringSplitOptions.None);
+        //        split[0] = split[0].Substring(1, split[0].Length - 2);
+        //        interveniente.Nome = split[1];
+        //        interveniente.Codigo = split[0];
+        //    }
+
+        //    intervs.Add(interveniente);
+        //}
         //    return null;
         //}
     }

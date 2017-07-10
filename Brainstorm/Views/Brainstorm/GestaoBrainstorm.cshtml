@@ -47,13 +47,18 @@
                 <td>@reuniao.DuracaoReal</td>
                 <td>@reuniao.Local</td>
                 <td align="right">
-                    <a id ="editar" href="#" title=@Traducoes.Traduz("Editar")> 
+                    <a data-reuniao-id="@reuniao.Id" id ="editar" href="@Url.Action("GestaoEdit", "Brainstorm", new { id = reuniao.Id })" title=@Traducoes.Traduz("Editar")> 
                         <span><i class="fa fa-edit fa-2x"></i></span> 
                     </a>
+
+                    @*<a data-reuniao-id="@reuniao.Id" class="editar" href="" title=@Traducoes.Traduz("Editar")>
+                        <span><i class="fa fa-edit fa-2x"></i></span>
+                    </a>*@
+
                     <a id ="visualizar" href="@Url.Action("", "", new { id = "" })" title=@Traducoes.Traduz("Visualizar")> 
                         <span><i class="fa fa-eye fa-2x"></i></span> 
                     </a>
-                    <a data-reuniao-id="@reuniao.Id" id ="remover" href="" title=@Traducoes.Traduz("Eliminar")>
+                    <a data-reuniao-id="@reuniao.Id" id ="remover" class="remover" href="" title=@Traducoes.Traduz("Eliminar")>
                         <span><i class="fa fa-trash fa-2x"></i></span> 
                     </a>
                 </td>
@@ -112,22 +117,45 @@
 
 
 
+        //$("#Reunioes").on('click', '.editar', function () {
+        //    var teste = "/Brainstorm/GestaoEdit/" + $(this).attr("data-reuniao-id");
+        //    alert(teste);
+        //    $.ajax({
+        //        url: "/Brainstorm/GestaoEdit/" + $(this).attr("data-reuniao-id"),
+        //        method: "GET",
+        //        sucess: function () {
+        //            alert("vizualizar");
+        //        }
+        //    });
+        //});
 
-
-
-
-        $("#remover").click(function() {
-            if (confirm("Tem a certeza?")) {
-                var teste = "/Brainstorm/GestaoBrainstorm/" + $(this).attr("data-reuniao-id");
-                alert(teste);
-                $.ajax({
-                    url: "/Brainstorm/GestaoBrainstorm/" + $(this).attr("data-reuniao-id"),
-                    method: "DELETE",
-                    sucess:function() {
-                        alert("fazer delete da linha");
-                    }
-                });
-            }
+        // corrigir esta funcao, adicionar ao controller "POST"
+        $("#Reunioes").on('click', '.remover', function () {
+            var teste = "/Brainstorm/GestaoDelete/" + $(this).attr("data-reuniao-id");
+            alert(teste);
+            $.ajax({
+                url: "/Brainstorm/GestaoDelete/" + $(this).attr("data-reuniao-id"),
+                method: "GET",
+                sucess: function () {
+                    alert("vizualizar");
+                    $(this).parents("tr").remove();
+                }
+            });
         });
+
+
+        //$("#remover").click(function() {
+        //    if (confirm("Tem a certeza?")) {
+        //        var teste = "/Brainstorm/GestaoBrainstorm/" + $(this).attr("data-reuniao-id");
+        //        alert(teste);
+        //        $.ajax({
+        //            url: "/Brainstorm/GestaoBrainstorm/" + $(this).attr("data-reuniao-id"),
+        //            method: "DELETE",
+        //            sucess:function() {
+        //                alert("fazer delete da linha");
+        //            }
+        //        });
+        //    }
+        //});
     });
 </script>           
